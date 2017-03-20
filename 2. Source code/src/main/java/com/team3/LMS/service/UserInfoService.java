@@ -1,6 +1,8 @@
 package com.team3.LMS.service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -11,34 +13,37 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.team3.LMS.dao.UserInfoDao;
+import com.team3.LMS.dto.Role;
 import com.team3.LMS.dto.UserInfo;
-import com.team3.LMS.security.UserInfoMapper;
-
 @Service
 @Transactional
-public class UserInfoService extends JdbcDaoSupport{
+public class UserInfoService implements UserDetailsService{
 	@Autowired
 	private UserInfoDao userInfoDao;
-	@Autowired
-	public UserInfoService(DataSource dataSource) {
-		this.setDataSource(dataSource);
-	}
 	
-    public UserInfo findUserInfo(String userName) {
-        String sql = "Select *"//
-                + " from USER_INFO where real_name = ? ";
- 
-        Object[] params = new Object[] { userName };
-        UserInfoMapper mapper = new UserInfoMapper();
-        try {
-            UserInfo userInfo = this.getJdbcTemplate().queryForObject(sql, params, mapper);
-            return userInfo;
-        } catch (EmptyResultDataAccessException e) {
-            return null;
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		UserInfo user = userInfoDao.findByEmail(username);
+		if (user == null) {
+            throw new UsernameNotFoundException("User not found");
         }
-    }
+		
+		Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
+		Set<Role> roles = user.getRoles();
+		for (Role role : roles) {
+			grantedAuthorities.add(new SimpleGrantedAuthority(role.getRoleName()));
+		}
+		
+		return new org.springframework.security.core.userdetails.User(
+				user.getEmail(), user.getPword(), grantedAuthorities);
+	}
 	public List<UserInfo> getUserInfoList() {
 		return (List<UserInfo>) userInfoDao.findAll();
 	}

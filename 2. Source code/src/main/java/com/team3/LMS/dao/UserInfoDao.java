@@ -11,5 +11,4 @@ import com.team3.LMS.dto.UserInfo;
 public interface UserInfoDao extends CrudRepository<UserInfo, Integer> {
 	Page<UserInfo> findAll(Pageable pageable);
 	UserInfo findByEmail(String email);
-	UserInfo findUserInfo(String userName);
 }

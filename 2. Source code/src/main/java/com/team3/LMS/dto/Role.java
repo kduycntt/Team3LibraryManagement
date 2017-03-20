@@ -1,7 +1,7 @@
 package com.team3.LMS.dto;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,11 +28,13 @@ public class Role implements Serializable {
 	private String roleName;
 
 	@ManyToMany(mappedBy = "roles")
-	private List<UserInfo> userInfos;
+	private Set<UserInfo> userInfos;
 
 	public Role() {
 	}
-
+	public Role(String role_name){
+		this.roleName = role_name;
+	}
 	public int getRoleId() {
 		return this.roleId;
 	}
@@ -49,12 +51,12 @@ public class Role implements Serializable {
 		this.roleName = roleName;
 	}
 	
-	@JsonIgnoreProperties({ "roles" })
-	public List<UserInfo> getUserInfos() {
+	//@JsonIgnoreProperties({ "roles" })
+	public Set<UserInfo> getUserInfos() {
 		return this.userInfos;
 	}
 
-	public void setUserInfos(List<UserInfo> userInfos) {
+	public void setUserInfos(Set<UserInfo> userInfos) {
 		this.userInfos = userInfos;
 	}
 
